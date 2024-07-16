@@ -19,21 +19,21 @@ int main(int argc, char *argv[]) {
         perror("fork failed");
         exit(EXIT_FAILURE);
     } else if (pid == 0) {
-        ssize_t bytesRead = read(fd, buffer,5);
-        if (bytesRead < 0) {
+        int b = read(fd, buffer,5);
+        if (b < 0) {
             perror("Child failed to read from file");
             exit(EXIT_FAILURE);
         }
-        buffer[bytesRead] = '\0';
+        buffer[b] = '\0';
         printf("Child read: %s\n", buffer);
     } else {
         wait(NULL);
-        ssize_t bytesRead = read(fd, buffer,10);
-        if (bytesRead < 0) {
+        int b = read(fd, buffer,10);
+        if (b < 0) {
             perror("Parent failed to read from file");
             exit(EXIT_FAILURE);
         }
-        buffer[bytesRead] = '\0';
+        buffer[b] = '\0';
         printf("Parent read: %s\n", buffer);
         close(fd);
     }

@@ -36,8 +36,7 @@ int main(int argc, char *argv[])
     {
         fcntl(fd, F_GETLK, &fvar);
         printf("\nFile already locked by process (pid): %d\n", fvar.l_pid);
-        close(fd);
-        return -1;
+	return -1;
     }
 
     printf("Locked\n");
@@ -45,16 +44,14 @@ int main(int argc, char *argv[])
     if (lseek(fd, -50, SEEK_END) == -1)
     {
         perror("lseek");
-        close(fd);
-        exit(1);
+	exit(1);
     }
 
     ssize_t bytes_read = read(fd, buffer, 50);
     if (bytes_read == -1)
     {
         perror("read");
-        close(fd);
-        exit(1);
+	exit(1);
     }
 
     buffer[bytes_read] = '\0';  // Null-terminate the buffer
@@ -70,8 +67,7 @@ int main(int argc, char *argv[])
     if (fcntl(fd, F_SETLK, &fvar) == -1)
     {
         perror("fcntl");
-        close(fd);
-        exit(1);
+	exit(1);
     }
 
     printf("Unlocked\n");

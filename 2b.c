@@ -1,53 +1,37 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <fcntl.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
-void print_file_flags(int fd);
+int main() {
+    const char *command = "ls";
 
-int main(int argc, char *argv[]) {
-    if (argc != 2) {
-        fprintf(stderr, "Usage: %s <file_descriptor>\n", argv[0]);
-        exit(EXIT_FAILURE);
+    if (command == NULL) {
+        fprintf(stderr, "Command is NULL\n");
+        return 1;
     }
 
-    int fd = atoi(argv[1]);
+    pid_t pid = fork();
 
-    int flags = fcntl(fd, F_GETFL);
-    if (flags == -1) {
-        perror("fcntl");
-        exit(EXIT_FAILURE);
+    if (pid == -1) {
+        perror("fork failed");
+        return -1;
+    } else if (pid == 0) {
+        // Child process
+        execl("/bin/sh", "sh", "-c", command, (char *)NULL);
+        // If execl() fails
+        _exit(EXIT_FAILURE);
+    } else {
+        // Parent process
+        int status;
+        if (waitpid(pid, &status, 0) == -1) {
+            perror("waitpid failed");
+            return -1;
+        } else {
+            printf("Command executed with exit status: %d\n", WEXITSTATUS(status));
+            return status;
+        }
     }
-
-    printf("File descriptor: %d\n", fd);
-    printf("File flags:\n");
-
-    switch (flags & O_ACCMODE) {
-        case O_RDONLY:
-            printf("  Read only\n");
-            break;
-        case O_WRONLY:
-            printf("  Write only\n");
-            break;
-        case O_RDWR:
-            printf("  Read/Write\n");
-            break;
-        default:
-            printf("  Unknown access mode\n");
-            break;
-    }
-
-    if (flags & O_APPEND) printf("  Append\n");
-    if (flags & O_NONBLOCK) printf("  Non-blocking\n");
-    if (flags & O_SYNC) printf("  Synchronous writes\n");
-    if (flags & O_DSYNC) printf("  Synchronous data writes\n");
-    if (flags & O_RSYNC) printf("  Synchronous reads\n");
-    if (flags & O_CREAT) printf("  Create\n");
-    if (flags & O_TRUNC) printf("  Truncate\n");
-    if (flags & O_EXCL) printf("  Exclusive\n");
-    if (flags & O_NOCTTY) printf("  No terminal control\n");
-    if (flags & O_CLOEXEC) printf("  Close-on-exec\n");
-
-    return 0;
 }
 

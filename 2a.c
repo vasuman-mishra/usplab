@@ -1,32 +1,20 @@
-#include <unistd.h>
 #include <stdio.h>
 #include <sys/stat.h>
-#include <sys/types.h>
-
-int main(int argc, char **argv)
-{
-    if(argc != 2)    
-        return 1;
-
-    struct stat fileStat;
-    if(stat(argv[1],&fileStat) < 0)    
-        return 1;
-
-    printf("Information for %s\n",argv[1]);
-    printf("---------------------------\n");
-    printf("File Size: \t\t%ld bytes\n",fileStat.st_size);
-    printf("Number of Links: \t%ld\n",fileStat.st_nlink);
-    printf("File inode: \t\t%ld\n",fileStat.st_ino);
-
-    printf("File Permissions: \t");
-    printf( (S_ISDIR(fileStat.st_mode)) ? "d" : "-");
-    printf( (fileStat.st_mode & S_IRUSR) ? "r" : "-");
-    printf( (fileStat.st_mode & S_IWUSR) ? "w" : "-");
-    printf( (fileStat.st_mode & S_IXUSR) ? "x" : "-");
-    printf( (fileStat.st_mode & S_IRGRP) ? "r" : "-");
-    printf("\n\n");
-
-    printf("The file %s a symbolic link\n", (S_ISLNK(fileStat.st_mode)) ? "is" : "is not");
-
-    return 0;
+int main(int argc, char *argv[]) {
+if (argc < 2) {
+fprintf(stderr, "Usage: %s <filename>\n", argv[0]);
+return 1;
+}
+struct stat file_stat;
+if (stat(argv[1], &file_stat) == -1) {
+perror("stat");
+return 1;
+}
+printf("File: %s\n", argv[1]);
+printf("Size: %lld bytes\n", (long long) file_stat.st_size);
+printf("Permissions: %o\n", file_stat.st_mode & 0777);
+printf("Number of Links: %ld\n", (long) file_stat.st_nlink);
+printf("Owner: UID=%ld, GID=%ld\n", (long) file_stat.st_uid, (long) file_stat.st_gid);
+printf("Last Access Time: %ld\n", (long) file_stat.st_atime);
+return 0;
 }

@@ -1,37 +1,19 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-
-int main() {
-    const char *command = "ls";
-
-    if (command == NULL) {
-        fprintf(stderr, "Command is NULL\n");
-        return 1;
-    }
-
-    pid_t pid = fork();
-
-    if (pid == -1) {
-        perror("fork failed");
-        return -1;
-    } else if (pid == 0) {
-        // Child process
-        execl("/bin/sh", "sh", "-c", command, (char *)NULL);
-        // If execl() fails
-        _exit(EXIT_FAILURE);
-    } else {
-        // Parent process
-        int status;
-        if (waitpid(pid, &status, 0) == -1) {
-            perror("waitpid failed");
-            return -1;
-        } else {
-            printf("Command executed with exit status: %d\n", WEXITSTATUS(status));
-            return status;
-        }
-    }
+#include<stdio.h>
+#include<fcntl.h>
+#include<unistd.h>
+#include<dirent.h>
+int main(){
+	DIR *dp;
+	struct dirent *dir;
+	int fd,n;
+	dp = opendir(".");
+	if(dp){
+		while((dir = readdir(dp)) != NULL){
+			fd = open(dir->d_name,O_RDWR,0777); 
+			n = lseek(fd,0,SEEK_END);
+			if(!n){
+				unlink(dir->d_name);
+			}
+		}
+	}
 }
-
